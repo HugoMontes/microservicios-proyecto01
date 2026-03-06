@@ -9,6 +9,7 @@ import com.mscv.usuario.external.service.HotelService;
 import com.mscv.usuario.repository.UsuarioRepository;
 import com.mscv.usuario.service.UsuarioService;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,7 @@ import org.springframework.web.client.RestTemplate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class UsuarioServiceImpl implements UsuarioService {
@@ -72,8 +74,15 @@ public class UsuarioServiceImpl implements UsuarioService {
 //        return usuario;
 //    }
 
-    @CircuitBreaker(name = "usuarioServiceBreaker", fallbackMethod = "fallbackUsuario")
+    private int cantidadReintentos = 1;
+
+    // @CircuitBreaker(name = "usuarioServiceBreaker", fallbackMethod = "fallbackUsuario")
+    @Retry(name = "usuarioServiceRetry", fallbackMethod = "fallbackUsuario")
     public Usuario getUsuario(String usuarioId) {
+        logger.info("Listar un solo usuario : UsuarioServiceImpl");
+        logger.info("Cantidad de intentos : {}", cantidadReintentos);
+        cantidadReintentos++;
+
         // 1. Obtenemos el usuario
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado con ID : " + usuarioId));
@@ -119,6 +128,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 
     public Usuario fallbackUsuario(String usuarioId, Exception exception) {
         Usuario usuario = usuarioRepository.findById(usuarioId).orElseThrow();
+        logger.info("Ejecutando fallbackUsuario : {}", usuario);
         usuario.setInformacionAdicional("Algunos servicios no estan disponibles");
         usuario.setCalificaciones(new ArrayList<>());
         return usuario;

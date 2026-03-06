@@ -50,6 +50,12 @@ resilience4j:
         slidingWindowSize: 10 # Numero de llamadas para evaluar
         slidingWindowsType: COUNT_BASED # Configuracion basada en numero de llamadas
 
+    retry:
+      instances:
+        usuarioServiceRetry: # Nombre del retry (debe coincidir con @Retry)
+          max-attempts: 3 # Número máximo de intentos
+          wait-duration: 5s # Tiempo de espera entre intentos
+
 #eureka:
 #  instance:
 #    prefer-ip-address: true
