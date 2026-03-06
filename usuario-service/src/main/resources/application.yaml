@@ -22,6 +22,34 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
 
+# Configuracion que expone informacion detallada del estado de salud de la aplicacion
+management:
+  health:
+    circuitbreakers:
+      enabled: true # 1. Activa la info de Circuit Breakers en el health check
+    enpoints:
+      web:
+        exposure:
+          include: health # 2. Expone el endpoint /actuator/health vía web
+    endpoint:
+      health:
+        show-details: always # 3. Muestra detalles completos (no solo "UP" o "DOWN")
+
+# Configuracion de Resilience4j
+resilience4j:
+  circuitbreaker:
+    instances:
+      usuarioServiceBreaker: # Debe coincidir con el name en @CircuitBreaker
+        registerHealthIndicator: true # Exponer estado del breaker para monitoreo
+        eventConsumerBufferSize: 10 # Tamaño del buffer para eventos (Logs internos)
+        failureRateThreshold: 50 # Abrir si el 50% de las llamadas fallan
+        minimumNumberOfCalls: 5 # Minimo de llamadas para calcular la tasa de fallos
+        automaticTransitionFromOpenToHalfOpenEnabled: true # Pasa de ABIERTO a SEMI-ABIERTO automáticamente
+        waitDurationInOpenState: 6s # Tiempo en OPEN antes de probar
+        permittedNumberOfCallsInHalfOpenState: 3 # Pruebas en HALF_OPEN
+        slidingWindowSize: 10 # Numero de llamadas para evaluar
+        slidingWindowsType: COUNT_BASED # Configuracion basada en numero de llamadas
+
 #eureka:
 #  instance:
 #    prefer-ip-address: true

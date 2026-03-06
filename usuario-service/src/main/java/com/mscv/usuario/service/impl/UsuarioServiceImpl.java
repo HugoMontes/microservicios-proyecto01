@@ -8,17 +8,15 @@ import com.mscv.usuario.external.service.CalificacionService;
 import com.mscv.usuario.external.service.HotelService;
 import com.mscv.usuario.repository.UsuarioRepository;
 import com.mscv.usuario.service.UsuarioService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class UsuarioServiceImpl implements UsuarioService {
@@ -74,7 +72,7 @@ public class UsuarioServiceImpl implements UsuarioService {
 //        return usuario;
 //    }
 
-    @Override
+    @CircuitBreaker(name = "usuarioServiceBreaker", fallbackMethod = "fallbackUsuario")
     public Usuario getUsuario(String usuarioId) {
         // 1. Obtenemos el usuario
         Usuario usuario = usuarioRepository.findById(usuarioId)
@@ -118,25 +116,11 @@ public class UsuarioServiceImpl implements UsuarioService {
         // 6. Retornar el usuario con las calificaciones
         return usuario;
     }
+
+    public Usuario fallbackUsuario(String usuarioId, Exception exception) {
+        Usuario usuario = usuarioRepository.findById(usuarioId).orElseThrow();
+        usuario.setInformacionAdicional("Algunos servicios no estan disponibles");
+        usuario.setCalificaciones(new ArrayList<>());
+        return usuario;
+    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -1,10 +1,7 @@
 package com.mscv.usuario.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Builder
 @Table(name = "usuarios")
 public class Usuario {
     @Id
@@ -31,6 +29,9 @@ public class Usuario {
 
     @Transient
     private List<Calificacion> calificaciones = new ArrayList<>();
+
+    @Transient
+    private String informacionAdicional;
 }
 
 
