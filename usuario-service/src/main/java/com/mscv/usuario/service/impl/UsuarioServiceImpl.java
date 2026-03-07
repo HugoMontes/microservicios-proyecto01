@@ -77,7 +77,7 @@ public class UsuarioServiceImpl implements UsuarioService {
     private int cantidadReintentos = 1;
 
     // @CircuitBreaker(name = "usuarioServiceBreaker", fallbackMethod = "fallbackUsuario")
-    @Retry(name = "usuarioServiceRetry", fallbackMethod = "fallbackUsuario")
+    // @Retry(name = "usuarioServiceRetry", fallbackMethod = "fallbackUsuario")
     public Usuario getUsuario(String usuarioId) {
         logger.info("Listar un solo usuario : UsuarioServiceImpl");
         logger.info("Cantidad de intentos : {}", cantidadReintentos);

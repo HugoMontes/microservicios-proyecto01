@@ -1,13 +1,14 @@
 package com.mscv.usuario.external.service;
 
 import com.mscv.usuario.entity.Calificacion;
+import com.mscv.usuario.external.fallback.CalificacionFallback;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@FeignClient(name = "CALIFICACION-SERVICE")
+@FeignClient(name = "CALIFICACION-SERVICE", fallback = CalificacionFallback.class)
 public interface CalificacionService {
 
     @GetMapping("/calificaciones/usuarios/{usuarioId}")

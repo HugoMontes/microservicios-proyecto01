@@ -21,6 +21,10 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true
 
 # Configuracion que expone informacion detallada del estado de salud de la aplicacion
 management:
@@ -49,6 +53,16 @@ resilience4j:
         permittedNumberOfCallsInHalfOpenState: 3 # Pruebas en HALF_OPEN
         slidingWindowSize: 10 # Numero de llamadas para evaluar
         slidingWindowsType: COUNT_BASED # Configuracion basada en numero de llamadas
+
+      HOTEL-SERVICE:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
+
+      CALIFICACION-SERVICE:
+        slidingWindowSize: 10
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10s
 
     retry:
       instances:
