@@ -3,13 +3,13 @@ package com.auth.jwt.security;
 import com.auth.jwt.entity.AuthUser;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
-import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,9 +28,8 @@ public class JwtProvider {
     // Prepare la clave de firma a partir del secreto
     @PostConstruct
     protected void init() {
-        // Decodifica el secreto en base64
-        byte[] decodedKey = Base64.getDecoder().decode(secret);
-        // Crea una clave segura a partir de los bytes
+        // Generar una clave segura automáticamente
+        byte[] decodedKey = Keys.secretKeyFor(SignatureAlgorithm.HS256).getEncoded();
         key = Keys.hmacShaKeyFor(decodedKey);
     }
 
