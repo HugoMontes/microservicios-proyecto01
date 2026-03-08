@@ -8,4 +8,4 @@ spring:
     import: optional:configserver:http://localhost:8085
 
 jwt:
-  secret: s3cr3t
+  secret: miClaveSuperSecretaParaJWT1234567

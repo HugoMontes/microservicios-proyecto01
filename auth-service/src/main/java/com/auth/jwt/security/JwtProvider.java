@@ -3,7 +3,6 @@ package com.auth.jwt.security;
 import com.auth.jwt.entity.AuthUser;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,12 +24,12 @@ public class JwtProvider {
     private Key key;
 
     // Metodo que se ejecuta despues de la construccion del bean
-    // Prepare la clave de firma a partir del secreto
+    // Convierte el secreto (texto plano) en una clave criptográfica HMAC-SHA256
+    // que JWT usará para firmar y validar tokens.
     @PostConstruct
     protected void init() {
-        // Generar una clave segura automáticamente
-        byte[] decodedKey = Keys.secretKeyFor(SignatureAlgorithm.HS256).getEncoded();
-        key = Keys.hmacShaKeyFor(decodedKey);
+        // Convertir el string del secreto a bytes y crear la clave HMAC
+        key = Keys.hmacShaKeyFor(secret.getBytes());
     }
 
     // Crea un token para un usuario autenticado
