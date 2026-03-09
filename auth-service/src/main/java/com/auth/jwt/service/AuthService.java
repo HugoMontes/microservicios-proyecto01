@@ -1,6 +1,8 @@
 package com.auth.jwt.service;
 
 import com.auth.jwt.dto.AuthUserDto;
+import com.auth.jwt.dto.NewUserDto;
+import com.auth.jwt.dto.RequestDto;
 import com.auth.jwt.dto.TokenDto;
 import com.auth.jwt.entity.AuthUser;
 import com.auth.jwt.repository.AuthUserRepository;
@@ -30,7 +32,7 @@ public class AuthService {
     }
 
     // Registra un nuevo usuario
-    public AuthUser save(AuthUserDto dto) {
+    public AuthUser save(NewUserDto dto) {
         Optional<AuthUser> user = authUserRepository.findByUsername(dto.getUsername());
         // Si el usuario existe no se registra
         if (user.isPresent()) {
@@ -42,6 +44,7 @@ public class AuthService {
         AuthUser authUser = AuthUser.builder()
                 .username(dto.getUsername())
                 .password(password)
+                .role(dto.getRole())
                 .build();
         // Guardar usuario
         return authUserRepository.save(authUser);
@@ -63,9 +66,9 @@ public class AuthService {
     }
 
     // Verifica si un token JWT es valido
-    public TokenDto validate(String token) {
+    public TokenDto validate(String token, RequestDto requestDto) {
         // Verifica firma y expiracion del token
-        if (!jwtProvider.validate(token)) {
+        if (!jwtProvider.validate(token, requestDto)) {
             return null;
         }
         // Obtener username desde el token

@@ -1,5 +1,6 @@
 package com.api.gateway.config;
 
+import com.api.gateway.dto.RequestDto;
 import com.api.gateway.dto.TokenDto;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
@@ -8,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
@@ -50,10 +52,16 @@ public class AuthFilter extends AbstractGatewayFilterFactory<AuthFilter.Config> 
             return webClient.build()
                     .post() // Metodo POST
                     .uri("http://auth-service/auth/validate?token=" + token) // URL de auth-service
+                    .bodyValue(new RequestDto( // Envia la URI y el metodo HTTP que el usuario intenta acceder
+                            exchange.getRequest().getPath().toString(),
+                            exchange.getRequest().getMethod().toString()
+                    ))
                     .retrieve() // Ejecuta la peticion
                     .bodyToMono(TokenDto.class) // Convertir respuesta a TokenDto (reactivo)
                     .map(response -> exchange) // Si la validación es exitosa, continuamos con el exchange
-                    .flatMap(chain::filter); // Encadenar al siguiente filtro (enviar al microservicio destino)
+                    .flatMap(chain::filter) // Encadenar al siguiente filtro (enviar al microservicio destino)
+                    .onErrorResume(WebClientResponseException.class, // Captura errores HTTP
+                            e -> onError(exchange, HttpStatus.UNAUTHORIZED));
         };
     }
 

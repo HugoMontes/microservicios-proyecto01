@@ -1,5 +1,6 @@
 package com.auth.jwt.security;
 
+import com.auth.jwt.dto.RequestDto;
 import com.auth.jwt.entity.AuthUser;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -23,6 +24,13 @@ public class JwtProvider {
     // Almacena la clave criptográfica para firmar/validar tokens
     private Key key;
 
+    // Inyectamos el validador de ruta
+    private final RouteValidator routeValidator;
+
+    public JwtProvider(RouteValidator routeValidator) {
+        this.routeValidator = routeValidator;
+    }
+
     // Metodo que se ejecuta despues de la construccion del bean
     // Convierte el secreto (texto plano) en una clave criptográfica HMAC-SHA256
     // que JWT usará para firmar y validar tokens.
@@ -37,6 +45,7 @@ public class JwtProvider {
         // Crea los claims que se guardaran en el token
         Map<String, Object> claims = new HashMap<>();
         claims.put("id", authUser.getId()); // Guardar ID del usuario
+        claims.put("role", authUser.getRole()); // Guardar el rol en el token
 
         // Generar fechas de emsion y expiracion
         Date now = new Date(); // Fecha y Hora actual
@@ -52,16 +61,39 @@ public class JwtProvider {
                 .compact(); // Generar el string del token
     }
 
-    // Verifica si un token es valido
-    public boolean validate(String token) {
+    // Valida un token JWT y verifica que tenga los permisos necesarios
+    // para acceder a la ruta solicitada.
+    public boolean validate(String token, RequestDto requestDto) {
         try {
             Jwts.parserBuilder()
                     .setSigningKey(key) // Establece la clave para verificar la firma
                     .build()
                     .parseClaimsJws(token);
-            return true;
+
+            // 2. Si la ruta requiere ADMIN, verificar que el token tenga rol ADMIN
+            if (routeValidator.isAdmin(requestDto) && !isAdmin(token)) {
+                return false; // No es admin pero intenta acceder a ruta admin
+            }
+
+            return true; // Token válido y autorización correcta
         } catch (Exception e) {
             return false;
+        }
+    }
+
+    // Verifica si el token pertenece a un administrador
+    private boolean isAdmin(String token) {
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            String role = (String) claims.get("role");
+            return "admin".equals(role);
+        } catch (Exception e) {
+            return false; // Si hay error al extraer rol, no es admin
         }
     }
 

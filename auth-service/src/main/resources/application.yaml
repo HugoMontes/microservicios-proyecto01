@@ -9,3 +9,8 @@ spring:
 
 jwt:
   secret: miClaveSuperSecretaParaJWT1234567
+
+admin-paths: # Prefixo del @ConfigurationProperties en la clase RouteValidator
+  paths:
+    - uri: "/usuarios"   # URI que sera administrado por admin
+      method: "POST"     # Metodo que sera administrado por admin
