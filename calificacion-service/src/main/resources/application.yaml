@@ -6,10 +6,8 @@ spring:
     name: calificacion-service
   config:
     import: optional:configserver:http://localhost:8085
-  data:
-    mongodb:
-      uri: mongodb://localhost:27017
-      database: microservicios
+  mongodb:
+      uri: mongodb://localhost:27017/microservicios
 
 #eureka:
 #  instance:
