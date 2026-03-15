@@ -27,34 +27,34 @@ management:
   health:
     circuitbreakers:
       enabled: true # 1. Activa la info de Circuit Breakers en el health check
-    enpoints:
-      web:
-        exposure:
-          include: health # 2. Expone el endpoint /actuator/health vía web
-    endpoint:
-      health:
-        show-details: always # 3. Muestra detalles completos (no solo "UP" o "DOWN")
+  endpoints:
+    web:
+      exposure:
+        include: health # 2. Expone el endpoint /actuator/health vía web
+  endpoint:
+    health:
+      show-details: always # 3. Muestra detalles completos (no solo "UP" o "DOWN")
 
 # Configuracion de Resilience4j
 resilience4j:
   circuitbreaker:
     instances:
       usuarioServiceBreaker: # Debe coincidir con el name en @CircuitBreaker
-        registerHealthIndicator: true # Exponer estado del breaker para monitoreo
-        eventConsumerBufferSize: 10 # Tamaño del buffer para eventos (Logs internos)
-        failureRateThreshold: 50 # Abrir si el 50% de las llamadas fallan
-        minimumNumberOfCalls: 5 # Minimo de llamadas para calcular la tasa de fallos
-        automaticTransitionFromOpenToHalfOpenEnabled: true # Pasa de ABIERTO a SEMI-ABIERTO automáticamente
-        waitDurationInOpenState: 6s # Tiempo en OPEN antes de probar
-        permittedNumberOfCallsInHalfOpenState: 3 # Pruebas en HALF_OPEN
-        slidingWindowSize: 10 # Numero de llamadas para evaluar
-        slidingWindowsType: COUNT_BASED # Configuracion basada en numero de llamadas
+        registerHealthIndicator: true # Exponer estado del breaker en /actuator/health
+        eventConsumerBufferSize: 10 # Tamaño del buffer para eventos internos del breaker
+        failureRateThreshold: 50 # Abre el circuito si el 50% de las llamadas fallan
+        minimumNumberOfCalls: 5 # Mínimo de llamadas para comenzar a calcular la tasa de fallos
+        automaticTransitionFromOpenToHalfOpenEnabled: true # Transición automática OPEN -> HALF_OPEN
+        waitDurationInOpenState: 6s # Tiempo en estado OPEN antes de pasar a HALF_OPEN
+        permittedNumberOfCallsInHalfOpenState: 3 # Llamadas de prueba en estado HALF_OPEN
+        slidingWindowSize: 10 # Número de llamadas para evaluar el estado del breaker
+        slidingWindowType: COUNT_BASED # Configuracion basada en numero de llamadas
 
-    retry:
-      instances:
-        usuarioServiceRetry: # Nombre del retry (debe coincidir con @Retry)
-          max-attempts: 3 # Número máximo de intentos
-          wait-duration: 5s # Tiempo de espera entre intentos
+  retry:
+    instances:
+      usuarioServiceRetry: # Nombre del retry (debe coincidir con @Retry)
+        max-attempts: 3 # Número máximo de intentos
+        wait-duration: 5s # Tiempo de espera entre cada reintento
 
 #eureka:
 #  instance:
